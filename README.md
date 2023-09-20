@@ -20,7 +20,12 @@ from my very limited understanding, most if not all ComfyUI workflows can be qua
 
 the principle is use an external library to calculate all nodes position, then retrieve back to `LiteGraph.js`
 
-recommend: remove reroute nodes so the algorithms work better as it figures out the ranks/depth, after applied layout u can re-add reroute nodes for any wires partially hidden by nodes
+recommend to remove reroute nodes:
+- directed acyclic graph has start & end nodes
+- the algorithms work by assigning ranks/depth to each node (hence “hierarchical” or “layered” in context of tree/upside-down graph)
+- reroute nodes mess up ranks/depth so should be removed
+- after applied layout u can re-add reroute nodes for any wires intercepted or  partially hidden by nodes
+- *side-note*: since ComfyUI workflows are left-right hence no depth but column
 
 requirements:
 - ComfyUI version later than PR comfyanonymous/ComfyUI#1273 or commit `bc76b38`
@@ -28,10 +33,6 @@ requirements:
 implemented algorithms:
 - Dagre layout from https://github.com/dagrejs/dagre
 - ELK ‘layered’ layout from https://github.com/kieler/elkjs
-
-other possible choices (but unsatisfying to me):
-- ELK layouts: https://eclipse.dev/elk/reference/algorithms.html
-- Cytoscape layouts: https://blog.js.cytoscape.org/2020/05/11/layouts/#choice-of-layout
 
 undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
 
@@ -42,8 +43,8 @@ undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
 **TODO**:
 - [x] refresh after apply layout
 - [x] add UI options to change density
-- [ ] better UI than pop-up for options to change density
-- [ ] option to select layout strategy (see docs for each algo)
+- [ ] better UI than pop-up (?) for options to change density
+- [ ] option to select layout strategy (see docs for each algo), maybe submenu
 
 ## example
 using [noisy latent composition example](https://comfyanonymous.github.io/ComfyUI_examples/noisy_latent_composition/)
@@ -62,3 +63,14 @@ remove groups coz nodes gonna be placed very differently
 
 - `ELK.js` ‘layered’ layout:
 ![Imgur](https://i.imgur.com/yNztWil.png)
+
+## extra
+
+other possible graph layout in JS (but unsatisfying to me nor for DAG):
+- ELK: https://eclipse.dev/elk/reference/algorithms.html
+- WebCOLA: https://github.com/tgdwyer/WebCola
+- Cytoscape: https://blog.js.cytoscape.org/2020/05/11/layouts/#choice-of-layout
+  - AVSDF: https://github.com/iVis-at-Bilkent/avsdf-base
+  - CoSE: https://github.com/iVis-at-Bilkent/cose-base
+- Graphology: https://graphology.github.io/standard-library/layout.html
+- Springy: https://github.com/dhotson/springy
