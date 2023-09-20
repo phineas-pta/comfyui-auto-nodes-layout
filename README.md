@@ -29,5 +29,23 @@ other possible choices (but unsatisfied to me):
 
 undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
 
+recommend: remove reroute nodes so the algorithms work better as it figures out the ranks/depth, after applied layout u can re-add reroute nodes for any wires partially hidden by nodes
+
 TODO:
 - add UI options to change density
+
+## example
+using [noisy latent composition example](https://comfyanonymous.github.io/ComfyUI_examples/noisy_latent_composition/)
+
+- original workflow:
+![Imgur](https://i.imgur.com/jqa3SoD.png)
+remove groups coz nodes placed very differently
+
+- `LiteGraph.js` default auto-arrange:
+![Imgur](https://i.imgur.com/3hTAdDU.png)
+
+- `Dagre.js` layout:
+![Imgur](https://i.imgur.com/19TVkpT.png)
+
+- `ELK.js` ‘layered’ layout:
+![Imgur](https://i.imgur.com/yNztWil.png)
