@@ -81,6 +81,7 @@ function dagreLayout() {
 		n.pos[1] = nodeLaidOut.y;
 	}
 
+	app.graph.setDirtyCanvas(true, true); // refresh after applying the layout
 	return;
 }
 
@@ -125,6 +126,7 @@ function elkLayeredLayout() {
 		})
 		.catch(console.error);
 
+	app.graph.setDirtyCanvas(true, true); // refresh after applying the layout
 	return;
 }
 
