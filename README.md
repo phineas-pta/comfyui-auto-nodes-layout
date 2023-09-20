@@ -31,8 +31,11 @@ undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
 
 recommend: remove reroute nodes so the algorithms work better as it figures out the ranks/depth, after applied layout u can re-add reroute nodes for any wires partially hidden by nodes
 
-TODO:
-- add UI options to change density
+**TODO**:
+- [x] refresh after apply layout
+- [x] add UI options to change density
+- [ ] better UI than pop-up for options to change density
+- [ ] option to select layout strategy (see docs for each algo)
 
 ## example
 using [noisy latent composition example](https://comfyanonymous.github.io/ComfyUI_examples/noisy_latent_composition/)
