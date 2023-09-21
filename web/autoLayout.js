@@ -8,7 +8,7 @@ import "./elk.bundled.min.js";
 
 
 app.registerExtension({
-	"name": "doof.autoNodesLayout",
+	"name": "PTA.autoNodesLayout",
 	setup() { // Add canvas menu options
 		const orig = LGraphCanvas.prototype.getCanvasMenuOptions;
 		LGraphCanvas.prototype.getCanvasMenuOptions = function () {
@@ -133,21 +133,24 @@ function elkLayeredLayout() {
 			"elk.layered.spacing.nodeNodeBetweenLayers": ranksep,
 			"elk.spacing.nodeNode": nodesep,
 		},
-	}
+	};
 
 	// apply layout algorithm
 	const elk = new ELK()
 		.layout(myElkGraph)
-		.then((val) => { // retrieve nodes position
+		.then((val) => {
+			// retrieve nodes position
 			for (const nodeLaidOut of val.children) {
 				const n = app.graph.getNodeById(nodeLaidOut.id);
 				n.pos[0] = nodeLaidOut.x;
 				n.pos[1] = nodeLaidOut.y;
 			}
+
+			// refresh after applying the layout
+			app.graph.setDirtyCanvas(true, true);
 		})
 		.catch(console.error);
 
-	app.graph.setDirtyCanvas(true, true); // refresh after applying the layout
 	return;
 }
 

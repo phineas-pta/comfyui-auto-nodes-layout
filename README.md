@@ -41,7 +41,7 @@ undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
 - spacing between nodes in same rank/depth/column
 
 **TODO**:
-- [x] refresh after apply layout
+- [x] refresh after apply layout (issues #1 #2)
 - [x] add UI options to change density
 - [ ] better UI than pop-up (?) for options to change density
 - [ ] option to select layout strategy (see docs for each algo), maybe submenu
