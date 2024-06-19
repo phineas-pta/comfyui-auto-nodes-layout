@@ -2,8 +2,8 @@
 name = "comfyui-auto-nodes-layout"
 description = "A ComfyUI extension to apply better nodes layout algorithm to ComfyUI workflow (mostly for visualization purpose)"
 version = "0.0.1"
-readme = {file = "README.md"}
-license = {file = "LICENSE"}
+readme = "README.md"
+license = "LICENSE"
 
 [project.urls]
 Repository = "https://github.com/phineas-pta/comfyui-auto-nodes-layout"
