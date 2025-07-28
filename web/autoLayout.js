@@ -6,26 +6,67 @@ import "./elk.bundled.min.js"; // copied from https://cdn.jsdelivr.net/npm/elkjs
 
 app.registerExtension({
 	"name": "PTA.autoNodesLayout",
-	"settings": [
-		{
-			id: "PTA.autoNodesLayout.ranksep",
-			name: "spacing (px) between ranks/depths/columns",
-			type: "number",
-			defaultValue: 200,
-		},
-		{
-			id: "PTA.autoNodesLayout.nodesep",
-			name: "spacing (px) between nodes in same rank/depth/column",
-			type: "number",
-			defaultValue: 150,
-		},
-	],
 	"aboutPageBadges": [
 		{
 			"label": "GitHub",
 			"url": "https://github.com/phineas-pta/comfyui-auto-nodes-layout",
 			"icon": "pi pi-github"
 		}
+	],
+	"settings": [
+		{
+			"id": "PTA.autoNodesLayout.ranksep",
+			"category": ["📍 auto nodes layout", "common settings", "ranksep"],
+			"name": "spacing (px) between columns",
+			"type": "number",
+			"defaultValue": 200,
+		},
+		{
+			"id": "PTA.autoNodesLayout.nodesep",
+			"category": ["📍 auto nodes layout", "common settings", "nodesep"],
+			"name": "spacing (px) between nodes in same column",
+			"type": "number",
+			"defaultValue": 150,
+		},
+		{
+			"id": "PTA.autoNodesLayout.dagre.ranker",
+			"category": ["📍 auto nodes layout", "Dagre.js layout settings", "ranker"],
+			"name": "algorithm to assigns a rank to each node in the input graph",
+			"type": "combo",
+			"defaultValue": "network-simplex",
+			"options": ["network-simplex", "tight-tree", "longest-path"],
+			"attrs": {
+				"editable": false,
+				"filter": false,
+			},
+			"tooltip": "refer to Dagre.js docs for details",
+		},
+		{
+			"id": "PTA.autoNodesLayout.elk.layering",
+			"category": ["📍 auto nodes layout", "ELK.js ‘layered’ layout settings", "layering"],
+			"name": "layering strategy",
+			"type": "combo",
+			"defaultValue": "NETWORK_SIMPLEX",
+			"options": ["NETWORK_SIMPLEX", "LONGEST_PATH", "LONGEST_PATH_SOURCE", "COFFMAN_GRAHAM"],
+			"attrs": {
+				"editable": false,
+				"filter": false,
+			},
+			"tooltip": "refer to ELK.js docs for details",
+		},
+		{
+			"id": "PTA.autoNodesLayout.elk.nodePlacement",
+			"category": ["📍 auto nodes layout", "ELK.js ‘layered’ layout settings", "nodePlacement"],
+			"name": "node placement strategy",
+			"type": "combo",
+			"defaultValue": "BRANDES_KOEPF",
+			"options": ["SIMPLE", "NETWORK_SIMPLEX", "BRANDES_KOEPF", "LINEAR_SEGMENTS"],
+			"attrs": {
+				"editable": false,
+				"filter": false,
+			},
+			"tooltip": "refer to ELK.js docs for details",
+		},
 	],
 	async setup() { // Called at the end of the startup process. Add canvas menu options
 		const orig = LGraphCanvas.prototype.getCanvasMenuOptions; // current user interface
@@ -73,8 +114,7 @@ async function dagreLayout() {
 		.Graph({ "compound": false })
 		.setGraph({
 			"rankdir": "LR", // left to right
-			"ranker": "network-simplex",
-			// values: "network-simplex", "tight-tree", "longest-path"
+			"ranker": app.extensionManager.setting.get("PTA.autoNodesLayout.dagre.ranker"),
 			"ranksep": app.extensionManager.setting.get("PTA.autoNodesLayout.ranksep"),
 			"nodesep": app.extensionManager.setting.get("PTA.autoNodesLayout.nodesep"),
 		})
@@ -123,7 +163,7 @@ async function elkLayeredLayout() {
 		"width": n.size[0],
 		"height": n.size[1],
 	}));
-	const myElkEdges = app.graph.links.filter(Boolean).map((e) => ({
+	const myElkEdges = [...app.graph.links.values()].filter(Boolean).map((e) => ({
 		"id": e.id,
 		"sources": [ e.origin_id ],
 		"targets": [ e.target_id ],
@@ -137,10 +177,8 @@ async function elkLayeredLayout() {
 		"layoutOptions": {
 			"elk.algorithm": "layered",
 			"elk.direction": "RIGHT",
-			"elk.layered.layering.strategy": "NETWORK_SIMPLEX",
-			// values: "NETWORK_SIMPLEX", "LONGEST_PATH", "COFFMAN_GRAHAM"
-			"elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
-			// values: "NETWORK_SIMPLEX", "BRANDES_KOEPF", "LINEAR_SEGMENTS"
+			"elk.layered.layering.strategy": app.extensionManager.setting.get("PTA.autoNodesLayout.elk.layering"),
+			"elk.layered.nodePlacement.strategy": app.extensionManager.setting.get("PTA.autoNodesLayout.elk.nodePlacement"),
 			"elk.layered.spacing.nodeNodeBetweenLayers": app.extensionManager.setting.get("PTA.autoNodesLayout.ranksep"),
 			"elk.spacing.nodeNode": app.extensionManager.setting.get("PTA.autoNodesLayout.nodesep"),
 		},
@@ -177,7 +215,7 @@ function popupInput() {
 			app.extensionManager.toast.add({
 				severity: "warn",
 				summary: "Warning",
-				detail: "Layout algorithms work better without Reroute nodes!\nbetter remove reroute before auto-layout then re-add after",
+				detail: "Layout algorithms work better without ReRoute nodes!\nbetter remove reroute before auto-layout then re-add after",
 			});
 			break;
 		}
