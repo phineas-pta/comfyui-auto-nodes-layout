@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-auto-nodes-layout"
-description = "A ComfyUI extension to apply better nodes layout algorithm to ComfyUI workflow (mostly for visualization purpose)"
-version = "0.0.1"
+description = "a ComfyUI extension that applies an improved node layout algorithm to ComfyUI workflows, primarily for better visualization"
+version = "0.0.2"
 readme = "README.md"
 license = { file = "LICENSE" }
 

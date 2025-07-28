@@ -1,50 +1,53 @@
 # ComfyUI auto nodes layout
 
-a ComfyUI extension to apply better nodes layout algorithm to ComfyUI workflow (mostly for visualization purpose)
+a ComfyUI extension that applies an improved node layout algorithm to ComfyUI workflows, primarily for better visualization
 
-this repo is a working prototype of my proof-of-concept in comfyanonymous/ComfyUI#1547
+this serves as a working prototype of the proof-of-concept detailed in comfyanonymous/ComfyUI#1547
 
-## short intro
+## description
 
-there’s already an [1-click auto-arrange graph](https://github.com/pythongosssss/ComfyUI-Custom-Scripts#auto-arrange-graph) but it relies on default `arrange()` of `LiteGraph.js` (backbone of ComfyUI) which [positions the nodes according to level of dependencies](https://github.com/jagenjo/litegraph.js/issues/9#issuecomment-377317416), it’s neat but imo the wires are very disorientated (for visualization purpose)
+while ComfyUI includes a [1-click auto-arrange feature](https://github.com/pythongosssss/ComfyUI-Custom-Scripts#auto-arrange-graph) based on `LiteGraph.js`’s default `arrange()` method, which [organizes nodes by dependency levels](https://github.com/jagenjo/litegraph.js/issues/9#issuecomment-377317416), i find its wire orientation often leads to visual clutter
 
-my ideal is to have all wires visible, in term of direction, flow and connection to nodes
+for better visualization, my goal is to ensure all connections are clearly visible, indicating their direction, flow, and specific node attachments
 
-from my very limited understanding, most if not all ComfyUI workflows can be qualified as [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph), so we can apply better [graph drawing algorithms](https://en.wikipedia.org/wiki/Graph_drawing), in particular here i focus on [hierarchical graph drawing](https://en.wikipedia.org/wiki/Layered_graph_drawing) the most suitable for directed acyclic graph
+given my limited understanding, it appears most (if not all) ComfyUI workflows can be classified as [directed acyclic graphs](https://en.wikipedia.org/wiki/Directed_acyclic_graph); this suggests that more advanced [graph drawing algorithms](https://en.wikipedia.org/wiki/Graph_drawing) could be applied; specifically, i’m focusing on [hierarchical graph drawing](https://en.wikipedia.org/wiki/Layered_graph_drawing), which seems particularly well-suited for directed acyclic graphs.
 
-**credit**: inspiration from this [comment](https://github.com/jagenjo/litegraph.js/issues/9#issuecomment-376413726)
+**credit**: this approach was inspired by this [comment](https://github.com/jagenjo/litegraph.js/issues/9#issuecomment-376413726)
 
-**disclaimer**: personal preference, graph very much larger, not always guarantee a better layout for all use-cases
+**disclaimer**: this reflects a personal preference, and it often produces larger graphs
+
+> [!IMPORTANT]
+> it’s recommended to remove ‘ReRoute’ nodes from your ComfyUI workflows prior to applying the layout
+
+Here’s why:
+- Directed acyclic graphs, like ComfyUI workflows, are typically structured with clear start and end nodes. Layout algorithms for such graphs operate by assigning a ‘column’ or ‘rank’ to each node, creating a layered visual hierarchy.
+- ‘ReRoute’ nodes disrupt this column assignment. Their presence can lead to misaligned nodes and a less intuitive, harder-to-read layout.
+- You can re-introduce ‘ReRoute’ nodes after the layout has been applied. This allows you to manage any wires that might be intercepted or partially obscured by other nodes in the newly optimized arrangement.
+
+It’s worth noting that since ComfyUI workflows are inherently oriented from left to right, the concept of ‘depth’ is more accurately described as a ‘column’ or ‘rank’ within this hierarchical context.
 
 ## implementation details
 
-the principle is use an external library to calculate all nodes position, then retrieve back to `LiteGraph.js`
+the principle is to use an external library to compute all nodes position, then retrieve back to `LiteGraph.js`
 
-recommend to remove reroute nodes:
-- directed acyclic graph has start & end nodes
-- the algorithms work by assigning ranks/depth to each node (hence “hierarchical” or “layered” in context of tree/upside-down graph)
-- reroute nodes mess up ranks/depth so should be removed
-- after applied layout u can re-add reroute nodes for any wires intercepted or  partially hidden by nodes
-- *side-note*: since ComfyUI workflows are left-right hence no depth but column
-
-requirements:
-- ComfyUI version later than PR comfyanonymous/ComfyUI#1273 or commit `bc76b38`
+requirements: ComfyUI version ≥ 0.3
 
 implemented algorithms:
 - Dagre layout from https://github.com/dagrejs/dagre
 - ELK ‘layered’ layout from https://github.com/kieler/elkjs
 
-undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo
+~~undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo~~ *(this feature is available in new version of ComfyUI)*
 
 2 options to control layout density:
-- spacing between ranks/depths/columns
-- spacing between nodes in same rank/depth/column
+- spacing between columns
+- spacing between nodes in same column
 
 **TODO**:
 - [x] refresh after apply layout (issues #1 #2)
 - [x] add UI options to change density
-- [ ] better UI than pop-up (?) for options to change density
-- [ ] option to select layout strategy (see docs for each algo), maybe submenu
+- [x] better UI than pop-up for options to change density
+- [x] option to select layout strategy (see docs for each algo), maybe submenu
+- [x] publish to Comfy Registry
 
 ## example
 using [noisy latent composition example](https://comfyanonymous.github.io/ComfyUI_examples/noisy_latent_composition/)
@@ -53,7 +56,7 @@ using [noisy latent composition example](https://comfyanonymous.github.io/ComfyU
 
 - original workflow:
 ![Imgur](https://i.imgur.com/jqa3SoD.png)
-remove groups coz nodes gonna be placed very differently
+remove groups because nodes gonna be placed very differently
 
 - `LiteGraph.js` default auto-arrange:
 ![Imgur](https://i.imgur.com/3hTAdDU.png)
@@ -66,7 +69,7 @@ remove groups coz nodes gonna be placed very differently
 
 ## extra
 
-other possible graph layout in JS (but unsatisfying to me nor for DAG):
+other possible graph layout in JS (but unsatisfying to me nor suitable for DAG):
 - ELK: https://eclipse.dev/elk/reference/algorithms.html
 - WebCOLA: https://github.com/tgdwyer/WebCola
 - Cytoscape: https://blog.js.cytoscape.org/2020/05/11/layouts/#choice-of-layout
