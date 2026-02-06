@@ -2,7 +2,7 @@
 
 a ComfyUI extension that applies an improved node layout algorithm to ComfyUI workflows, primarily for better visualization
 
-this serves as a working prototype of the proof-of-concept detailed in comfyanonymous/ComfyUI#1547
+this serves as a working prototype of the proof-of-concept detailed in Comfy-Org/ComfyUI#1547
 
 ## description
 
@@ -26,30 +26,34 @@ Here’s why:
 
 It’s worth noting that since ComfyUI workflows are inherently oriented from left to right, the concept of ‘depth’ is more accurately described as a ‘column’ or ‘rank’ within this hierarchical context.
 
+## how to use
+
+**Installation**: via ComfyUI Manager for ease of use, or clone this repository manually using `git` if you’re developing (no additional requirements needed)
+
+**Using**:
+1. Finalize your workflow, then remove any Reroute nodes from your graph (you can add them back afterward if needed)
+2. Access the layout options by either:
+   - Right-clicking on the canvas, or
+   - Navigating to the top menu bar: Extensions > 📍 auto nodes layout
+3. Choose your preferred layout algorithm from the available options
+4. Customize the spacing between columns and nodes by adjusting the settings in ComfyUI settings
+
 ## implementation details
 
 the principle is to use an external library to compute all nodes position, then retrieve back to `LiteGraph.js`
 
-requirements: ComfyUI version ≥ 0.3
+requirements: ComfyUI version ≥ 0.12.3
 
 implemented algorithms:
 - Dagre layout from https://github.com/dagrejs/dagre
 - ELK ‘layered’ layout from https://github.com/kieler/elkjs
 
-~~undo/redo possible with https://github.com/bmad4ever/ComfyUI-Bmad-DirtyUndoRedo~~ *(this feature is available in new version of ComfyUI)*
-
 2 options to control layout density:
-- spacing between columns
-- spacing between nodes in same column
-
-**TODO**:
-- [x] refresh after apply layout (issues #1 #2)
-- [x] add UI options to change density
-- [x] better UI than pop-up for options to change density
-- [x] option to select layout strategy (see docs for each algo), maybe submenu
-- [x] publish to Comfy Registry
+- horizontal spacing between columns
+- vertical spacing between nodes in same column
 
 ## example
+
 using [noisy latent composition example](https://comfyanonymous.github.io/ComfyUI_examples/noisy_latent_composition/)
 
 (the empty black rectangle box is browser viewport)

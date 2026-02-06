@@ -3,23 +3,28 @@ import "./dagre.min.js"; // copied from https://cdn.jsdelivr.net/npm/dagre/dist/
 import "./elk.bundled.min.js"; // copied from https://cdn.jsdelivr.net/npm/elkjs/lib/elk.bundled.min.js
 // i failed to do named import with those libraries
 
+// docs: https://docs.comfy.org/custom-nodes/js/javascript_overview
 
-const autonodes_id = "PTA.autoNodesLayout";
-const autonodes_label = "📍 auto nodes layout";
+///////////////////////////////////////////////////////////////////////////////
+// define some objects to avoid making a big messy object with `app.registerExtension`
+
+const autonodes_id = "PTA.autoNodesLayout"; // prefix for all settings, commands, and menu items to avoid naming conflicts
+const autonodes_label = "📍 auto nodes layout"; // shown in menus & settings
 
 
+// shown in comfyui settings
 const autonodes_settings = [
 	{
 		"id": `${autonodes_id}.ranksep`,
 		"category": [autonodes_label, "common settings", "ranksep"],
-		"name": "spacing (px) between columns",
+		"name": "horizontal spacing (px) between columns",
 		"type": "number",
 		"defaultValue": 200,
 	},
 	{
 		"id": `${autonodes_id}.nodesep`,
 		"category": [autonodes_label, "common settings", "nodesep"],
-		"name": "spacing (px) between nodes in same column",
+		"name": "vertical spacing (px) between nodes in same column",
 		"type": "number",
 		"defaultValue": 150,
 	},
@@ -63,6 +68,7 @@ const autonodes_settings = [
 		"tooltip": "refer to ELK.js docs for details",
 	},
 ];
+// show in comfyui right-click menu in canvas
 const autonodes_rightclickmenu = {
 	"content": autonodes_label,
 	"has_submenu": true,
@@ -83,6 +89,7 @@ const autonodes_rightclickmenu = {
 		],
 	},
 };
+// show in comfyui top-bar menu
 const autonodes_topbarcommands = [
 	{
 		"id": `${autonodes_id}.default`,
@@ -120,16 +127,12 @@ app.registerExtension({
 	"commands": autonodes_topbarcommands,
 	"menuCommands": autonodes_topbarmenu,
 	"settings": autonodes_settings,
-	async setup() { // Called at the end of the startup process. Add canvas menu options
-		const orig = LGraphCanvas.prototype.getCanvasMenuOptions; // current user interface
-		LGraphCanvas.prototype.getCanvasMenuOptions = function () {
-			const options = orig.apply(this, arguments);
-			options.push(autonodes_rightclickmenu); // add my custom function as menu options, see definition below
-			return options;
-		}
+	getCanvasMenuItems(canvas) { // add to right-click menu
+		return [null, autonodes_rightclickmenu]; // null creates visual separator
 	},
 });
 
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * arrange nodes using Dagre layout

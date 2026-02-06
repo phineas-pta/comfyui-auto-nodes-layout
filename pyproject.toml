@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-auto-nodes-layout"
 description = "a ComfyUI extension that applies an improved node layout algorithm to ComfyUI workflows, primarily for better visualization"
-version = "0.0.2"
+version = "0.0.3"
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = ["Operating System :: OS Independent"]
@@ -14,4 +14,4 @@ Repository = "https://github.com/phineas-pta/comfyui-auto-nodes-layout"
 PublisherId = "phineas-pta"
 DisplayName = "comfyui-auto-nodes-layout"
 Icon = ""
-requires-comfyui = ">=0.3.0" 
+requires-comfyui = ">=0.12.3" 
