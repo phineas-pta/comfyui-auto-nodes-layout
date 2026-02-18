@@ -28,6 +28,9 @@ It’s worth noting that since ComfyUI workflows are inherently oriented from le
 
 ## how to use
 
+> [!WARNING]
+> As per issue #8 changes to graph not visible until Undo + Redo. I struggle to reproduce this bug with my machine, if u have any additional information please share in #8
+
 **Installation**: via ComfyUI Manager for ease of use, or clone this repository manually using `git` if you’re developing (no additional requirements needed)
 
 **Using**:
@@ -51,6 +54,10 @@ implemented algorithms:
 2 options to control layout density:
 - horizontal spacing between columns
 - vertical spacing between nodes in same column
+
+**TODO**
+- [ ] apply layout to only a subset of nodes instead of whole graph
+- [ ] find more layout algorithm, in JS preferably
 
 ## example
 
