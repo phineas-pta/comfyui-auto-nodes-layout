@@ -1,9 +1,12 @@
+// docs: https://docs.comfy.org/custom-nodes/js/javascript_overview
+
 import { app } from "/scripts/app.js"; // the Comfy application running in the browser
 import "./dagre.min.js"; // copied from https://cdn.jsdelivr.net/npm/dagre/dist/dagre.min.js
 import "./elk.bundled.min.js"; // copied from https://cdn.jsdelivr.net/npm/elkjs/lib/elk.bundled.min.js
-// i failed to do named import with those libraries
+// import "./cola.min.js"; // copied from https://cdn.jsdelivr.net/npm/webcola/WebCola/cola.min.js
 
-// docs: https://docs.comfy.org/custom-nodes/js/javascript_overview
+// i failed to do named import with those libraries
+// dagre & ELK are now available in `window` object
 
 ///////////////////////////////////////////////////////////////////////////////
 // define some objects to avoid making a big messy object with `app.registerExtension`
@@ -137,13 +140,14 @@ app.registerExtension({
 /**
  * arrange nodes using Dagre layout
  * @see https://github.com/dagrejs/dagre
+ * @see https://github.com/dagrejs/dagre/wiki
  * @returns {undefined} Nothing is returned.
  */
 async function dagreLayout() {
 	popupInput(); // see definition below
 
 	// setup dagre
-	const daG = new dagre.graphlib
+	const daG = new window.dagre.graphlib
 		.Graph({ "compound": false })
 		.setGraph({
 			"rankdir": "LR", // left to right
@@ -168,7 +172,7 @@ async function dagreLayout() {
 	));
 
 	// apply layout algorithm
-	dagre.layout(daG);
+	window.dagre.layout(daG);
 
 	// retrieve nodes position
 	for (const n of app.graph._nodes) {
@@ -185,6 +189,7 @@ async function dagreLayout() {
 /**
  * arrange nodes using ELK ‘layered’ layout
  * @see https://github.com/kieler/elkjs
+ * @see https://eclipse.dev/elk/reference/algorithms/org-eclipse-elk-layered.html
  * @returns {undefined} Nothing is returned.
  */
 async function elkLayeredLayout() {
@@ -218,7 +223,7 @@ async function elkLayeredLayout() {
 	};
 
 	// apply layout algorithm
-	const elk = new ELK()
+	const elk = new window.ELK()
 		.layout(myElkGraph)
 		.then((val) => {
 			// retrieve nodes position
@@ -232,6 +237,53 @@ async function elkLayeredLayout() {
 			app.graph.setDirtyCanvas(true, true);
 		})
 		.catch(console.error);
+
+	return;
+}
+
+
+/**
+ * arrange nodes using WebCola layout
+ * @see https://github.com/tgdwyer/WebCola
+ * @see https://github.com/timelyportfolio/buildingwidgets/blob/gh-pages/content/post/2015-11-19-week46/index.Rmd
+ * @see https://github.com/tgdwyer/WebCola/blob/master/src/layout.ts
+ * @see https://github.com/tgdwyer/WebCola/wiki/Constraints
+ * @returns {undefined} Nothing is returned.
+ */
+async function colaLayout() {
+	popupInput(); // see definition below
+
+	// convert litegraph to cola
+	const myColaNodes = app.graph._nodes.map((n) => ({
+		"name": n.id.toString(),
+		"width": n.size[0],
+		"height": n.size[1],
+	}));
+	const nodesMap = myColaNodes.reduce((map, obj, id) => (map[obj.name] = id, map), {}); // find index from id
+	const myColaLinks = [...app.graph.links.values()].filter(Boolean).map((e) => ({
+		"source": nodesMap[e.origin_id.toString()],
+		"target": nodesMap[e.target_id.toString()],
+	}));
+
+	// apply layout algorithm
+	const g_cola = new window.cola.Layout()
+		.avoidOverlaps(true)
+		.handleDisconnected(false)
+		.flowLayout("x", 3*app.extensionManager.setting.get(`${autonodes_id}.ranksep`))
+		.symmetricDiffLinkLengths(app.extensionManager.setting.get(`${autonodes_id}.nodesep`))
+		.nodes(myColaNodes)
+		.links(myColaLinks);
+	g_cola.start();
+	g_cola.updateNodePositions();
+
+	// retrieve nodes position
+	for (const n of app.graph._nodes) {
+		const nodeLaidOut = g_cola.nodes().find((el) => el.name == n.id.toString());
+		n.pos[0] = nodeLaidOut.x;
+		n.pos[1] = nodeLaidOut.y;
+	}
+
+	app.graph.setDirtyCanvas(true, true);
 
 	return;
 }

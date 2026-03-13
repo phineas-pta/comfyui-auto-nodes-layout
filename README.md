@@ -57,6 +57,7 @@ implemented algorithms:
 
 **TODO**
 - [ ] apply layout to only a subset of nodes instead of whole graph
+- [ ] webcola layout: experimental, still exploring optimal settings
 - [ ] find more layout algorithm, in JS preferably
 
 ## example
