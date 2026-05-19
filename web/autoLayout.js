@@ -79,7 +79,7 @@ const autonodes_rightclickmenu = {
 		"options": [
 			{
 				"content": "LiteGraph.js default layout",
-				"callback": () => app.graph.arrange()
+				"callback": () => (app.canvas.graph || app.graph).arrange()
 			},
 			{
 				"content": "Dagre.js layout",
@@ -97,7 +97,7 @@ const autonodes_topbarcommands = [
 	{
 		"id": `${autonodes_id}.default`,
 		"label": "LiteGraph.js default layout",
-		"function": () => app.graph.arrange()
+		"function": () => (app.canvas.graph || app.graph).arrange()
 	},
 	{
 		"id": `${autonodes_id}.dagre`,
@@ -144,7 +144,8 @@ app.registerExtension({
  * @returns {undefined} Nothing is returned.
  */
 async function dagreLayout() {
-	popupInput(); // see definition below
+	const activeGraph = app.canvas.graph || app.graph;
+	popupInput(activeGraph); // see definition below
 
 	// setup dagre
 	const daG = new window.dagre.graphlib
@@ -159,14 +160,14 @@ async function dagreLayout() {
 		.setDefaultEdgeLabel(() => ({}));
 
 	// convert litegraph to dagre
-	app.graph._nodes.forEach((n) => daG.setNode(
+	activeGraph._nodes.forEach((n) => daG.setNode(
 		n.id.toString(),
 		{
 			"width": n.size[0],
 			"height": n.size[1],
 		}
 	));
-	app.graph.links.forEach((e) => daG.setEdge(
+	activeGraph.links.forEach((e) => daG.setEdge(
 		e.origin_id.toString(),
 		e.target_id.toString()
 	));
@@ -175,13 +176,13 @@ async function dagreLayout() {
 	window.dagre.layout(daG);
 
 	// retrieve nodes position
-	for (const n of app.graph._nodes) {
+	for (const n of activeGraph._nodes) {
 		const nodeLaidOut = daG.node(n.id.toString());
 		n.pos[0] = nodeLaidOut.x;
 		n.pos[1] = nodeLaidOut.y;
 	}
 
-	app.graph.setDirtyCanvas(true, true); // refresh after applying the layout
+	activeGraph.setDirtyCanvas(true, true); // refresh after applying the layout
 	return;
 }
 
@@ -193,15 +194,16 @@ async function dagreLayout() {
  * @returns {undefined} Nothing is returned.
  */
 async function elkLayeredLayout() {
-	popupInput(); // see definition below
+	const activeGraph = app.canvas.graph || app.graph;
+	popupInput(activeGraph); // see definition below
 
 	// convert litegraph to elk
-	const myElkNodes = app.graph._nodes.map((n) => ({
+	const myElkNodes = activeGraph._nodes.map((n) => ({
 		"id": n.id,
 		"width": n.size[0],
 		"height": n.size[1],
 	}));
-	const myElkEdges = [...app.graph.links.values()].filter(Boolean).map((e) => ({
+	const myElkEdges = [...activeGraph.links.values()].filter(Boolean).map((e) => ({
 		"id": e.id,
 		"sources": [ e.origin_id ],
 		"targets": [ e.target_id ],
@@ -228,13 +230,13 @@ async function elkLayeredLayout() {
 		.then((val) => {
 			// retrieve nodes position
 			for (const nodeLaidOut of val.children) {
-				const n = app.graph.getNodeById(nodeLaidOut.id);
+				const n = activeGraph.getNodeById(nodeLaidOut.id);
 				n.pos[0] = nodeLaidOut.x;
 				n.pos[1] = nodeLaidOut.y;
 			}
 
 			// refresh after applying the layout
-			app.graph.setDirtyCanvas(true, true);
+			activeGraph.setDirtyCanvas(true, true);
 		})
 		.catch(console.error);
 
@@ -251,16 +253,17 @@ async function elkLayeredLayout() {
  * @returns {undefined} Nothing is returned.
  */
 async function colaLayout() {
-	popupInput(); // see definition below
+	const activeGraph = app.canvas.graph || app.graph;
+	popupInput(activeGraph); // see definition below
 
 	// convert litegraph to cola
-	const myColaNodes = app.graph._nodes.map((n) => ({
+	const myColaNodes = activeGraph._nodes.map((n) => ({
 		"name": n.id.toString(),
 		"width": n.size[0],
 		"height": n.size[1],
 	}));
 	const nodesMap = myColaNodes.reduce((map, obj, id) => (map[obj.name] = id, map), {}); // find index from id
-	const myColaLinks = [...app.graph.links.values()].filter(Boolean).map((e) => ({
+	const myColaLinks = [...activeGraph.links.values()].filter(Boolean).map((e) => ({
 		"source": nodesMap[e.origin_id.toString()],
 		"target": nodesMap[e.target_id.toString()],
 	}));
@@ -277,13 +280,13 @@ async function colaLayout() {
 	g_cola.updateNodePositions();
 
 	// retrieve nodes position
-	for (const n of app.graph._nodes) {
+	for (const n of activeGraph._nodes) {
 		const nodeLaidOut = g_cola.nodes().find((el) => el.name == n.id.toString());
 		n.pos[0] = nodeLaidOut.x;
 		n.pos[1] = nodeLaidOut.y;
 	}
 
-	app.graph.setDirtyCanvas(true, true);
+	activeGraph.setDirtyCanvas(true, true);
 
 	return;
 }
@@ -294,8 +297,8 @@ async function colaLayout() {
  * also served as placeholder for any additional check in the future
  * @returns {undefined} Nothing is returned.
  */
-function popupInput() {
-	for (const n of app.graph._nodes) {
+function popupInput(activeGraph) {
+	for (const n of activeGraph._nodes) {
 		if (n.type === "Reroute") {
 			app.extensionManager.toast.add({
 				severity: "warn",
